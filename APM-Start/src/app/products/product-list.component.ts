@@ -1,55 +1,112 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
 
 import { IProduct } from './product';
 import { ProductService } from './product.service';
+import { NgModel } from '@angular/forms';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
-    templateUrl: './product-list.component.html',
-    styleUrls: ['./product-list.component.css']
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
-    pageTitle: string = 'Product List';
-    showImage: boolean;
+export class ProductListComponent implements OnInit, AfterViewInit {
 
-    imageWidth: number = 50;
-    imageMargin: number = 2;
-    errorMessage: string;
+  pageTitle: string = 'Product List';
+  showImage: boolean;
+  listFilter: string;
+  imageWidth: number = 50;
+  imageMargin: number = 2;
+  errorMessage: string;
 
-    private _listFilter: string;
-    get listFilter(): string {
-      return this._listFilter;
+  @ViewChild('filterElement') filterElementRef: ElementRef;
+  private _sub: Subscription;
+  @ViewChild(NgModel) filterInput: NgModel;
+  // private _filterInput: NgModel;
+
+  // get filterInput(): NgModel {
+  //   return this._filterInput;
+  // }
+
+  // @ViewChild(NgModel)
+  // set filterInput(value: NgModel) {
+  //   this._filterInput = value;
+  //   console.log(this.filterInput)
+  //   if (this.filterInput && !this._sub) {
+  //     console.log('Subscribing');
+  //     this._sub = this.filterInput.valueChanges.subscribe(
+  //       () => {
+  //         this.performFilter(this.listFilter);
+  //         console.log('Performed the filter');
+  //       }
+  //     );
+  //   }
+  //   if (this.filterElementRef) {
+  //     this.filterElementRef.nativeElement.focus();
+  //   }
+  // }
+
+  // @ViewChild(NgModel) filterInput: NgModel;
+  // @ViewChildren('filterElement, nameElement') inputElementRefs: QueryList<ElementRef>;
+
+  // private _listFilter: string;
+  // get listFilter(): string {
+  //   return this._listFilter;
+  // }
+
+  // set listFilter(value: string) {
+  //   this._listFilter = value;
+  //   this.performFilter(this.listFilter);
+  // }
+
+  // private _listFilterInput: NgModel;
+  // get listFilterInput(): NgModel {
+  //   return this._listFilterInput;
+  // }
+
+  // @ViewChild(NgModel)
+  // set listFilterInput(value: NgModel) {
+  //   this._listFilterInput = value;
+  //   this._listFilterInput.valueChanges.subscribe(
+  //     () => this.performFilter(this.listFilter)
+  //   );
+  //   if (this.filterElementRef) {
+  //     this.filterElementRef.nativeElement.focus();
+  //   }
+  // }
+
+  filteredProducts: IProduct[];
+  products: IProduct[];
+
+  constructor(private productService: ProductService) { }
+
+  ngOnInit(): void {
+    this.productService.getProducts().subscribe(
+      (products: IProduct[]) => {
+        this.products = products;
+        this.performFilter(this.listFilter);
+      },
+      (error: any) => this.errorMessage = <any>error
+    );
+  }
+
+  ngAfterViewInit(): void {
+    this.filterInput.valueChanges.subscribe(
+      () => this.performFilter(this.listFilter)
+    );
+    this.filterElementRef.nativeElement.focus();
+    // console.log(this.inputElementRefs);
+  }
+
+  toggleImage(): void {
+    this.showImage = !this.showImage;
+  }
+
+  performFilter(filterBy?: string): void {
+    if (filterBy) {
+      this.filteredProducts = this.products.filter((product: IProduct) =>
+        product.productName.toLocaleLowerCase().indexOf(filterBy.toLocaleLowerCase()) !== -1);
+    } else {
+      this.filteredProducts = this.products;
     }
-
-    set listFilter(value: string) {
-      this._listFilter = value;
-      this.performFilter(this.listFilter);
-    }
-
-    filteredProducts: IProduct[];
-    products: IProduct[];
-
-    constructor(private productService: ProductService) { }
-
-    ngOnInit(): void {
-        this.productService.getProducts().subscribe(
-            (products: IProduct[]) => {
-                this.products = products;
-                this.performFilter(this.listFilter);
-            },
-            (error: any) => this.errorMessage = <any>error
-        );
-    }
-
-    toggleImage(): void {
-        this.showImage = !this.showImage;
-    }
-
-    performFilter(filterBy?: string): void {
-        if (filterBy) {
-            this.filteredProducts = this.products.filter((product: IProduct) =>
-                product.productName.toLocaleLowerCase().indexOf(filterBy.toLocaleLowerCase()) !== -1);
-        } else {
-            this.filteredProducts = this.products;
-        }
-    }
+  }
 }
