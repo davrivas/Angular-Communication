@@ -1,78 +1,20 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { IProduct } from './product';
 import { ProductService } from './product.service';
-import { NgModel } from '@angular/forms';
-import { Subscription } from 'rxjs/Subscription';
 
 @Component({
+  selector: 'pm-criteria',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit, AfterViewInit {
-
+export class ProductListComponent implements OnInit {
   pageTitle: string = 'Product List';
   showImage: boolean;
-  listFilter: string;
+
   imageWidth: number = 50;
   imageMargin: number = 2;
   errorMessage: string;
-
-  @ViewChild('filterElement') filterElementRef: ElementRef;
-  private _sub: Subscription;
-  @ViewChild(NgModel) filterInput: NgModel;
-  // private _filterInput: NgModel;
-
-  // get filterInput(): NgModel {
-  //   return this._filterInput;
-  // }
-
-  // @ViewChild(NgModel)
-  // set filterInput(value: NgModel) {
-  //   this._filterInput = value;
-  //   console.log(this.filterInput)
-  //   if (this.filterInput && !this._sub) {
-  //     console.log('Subscribing');
-  //     this._sub = this.filterInput.valueChanges.subscribe(
-  //       () => {
-  //         this.performFilter(this.listFilter);
-  //         console.log('Performed the filter');
-  //       }
-  //     );
-  //   }
-  //   if (this.filterElementRef) {
-  //     this.filterElementRef.nativeElement.focus();
-  //   }
-  // }
-
-  // @ViewChild(NgModel) filterInput: NgModel;
-  // @ViewChildren('filterElement, nameElement') inputElementRefs: QueryList<ElementRef>;
-
-  // private _listFilter: string;
-  // get listFilter(): string {
-  //   return this._listFilter;
-  // }
-
-  // set listFilter(value: string) {
-  //   this._listFilter = value;
-  //   this.performFilter(this.listFilter);
-  // }
-
-  // private _listFilterInput: NgModel;
-  // get listFilterInput(): NgModel {
-  //   return this._listFilterInput;
-  // }
-
-  // @ViewChild(NgModel)
-  // set listFilterInput(value: NgModel) {
-  //   this._listFilterInput = value;
-  //   this._listFilterInput.valueChanges.subscribe(
-  //     () => this.performFilter(this.listFilter)
-  //   );
-  //   if (this.filterElementRef) {
-  //     this.filterElementRef.nativeElement.focus();
-  //   }
-  // }
 
   filteredProducts: IProduct[];
   products: IProduct[];
@@ -83,18 +25,10 @@ export class ProductListComponent implements OnInit, AfterViewInit {
     this.productService.getProducts().subscribe(
       (products: IProduct[]) => {
         this.products = products;
-        this.performFilter(this.listFilter);
+        this.performFilter();
       },
       (error: any) => this.errorMessage = <any>error
     );
-  }
-
-  ngAfterViewInit(): void {
-    this.filterInput.valueChanges.subscribe(
-      () => this.performFilter(this.listFilter)
-    );
-    this.filterElementRef.nativeElement.focus();
-    // console.log(this.inputElementRefs);
   }
 
   toggleImage(): void {
